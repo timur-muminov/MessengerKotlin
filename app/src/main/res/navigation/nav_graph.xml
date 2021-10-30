@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/fragmentAuth">
+
+    <fragment
+        android:id="@+id/fragmentAuth"
+        android:name="com.messengerkotlin.fragments.authorization.Authorization"
+        android:label="FragmentAuth"
+        tools:layout="@layout/fragment_auth">
+        <action
+            android:id="@+id/action_fragmentAuth_to_fragmentUsers"
+            app:destination="@id/fragmentUsers" />
+        <action
+            android:id="@+id/action_fragmentAuth_to_fragmentRegistration"
+            app:destination="@id/fragmentRegistration" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentRegistration"
+        android:name="com.messengerkotlin.fragments.registration.Registration"
+        android:label="FragmentRegistration"
+        tools:layout="@layout/fragment_registration">
+        <action
+            android:id="@+id/action_fragmentRegistration_to_fragmentUsers"
+            app:destination="@id/fragmentUsers" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentUsers"
+        android:name="com.messengerkotlin.fragments.users.Users"
+        android:label="FragmentUsers"
+        tools:layout="@layout/fragment_users">
+        <action
+            android:id="@+id/action_fragmentUsers_to_fragmentChatroom"
+            app:destination="@id/fragmentChatroom" />
+        <action
+            android:id="@+id/action_fragmentUsers_to_fragmentAuth"
+            app:destination="@id/fragmentAuth" />
+        <action
+            android:id="@+id/action_fragmentUsers_to_fragmentProfile"
+            app:destination="@id/fragmentProfile" />
+        <action
+            android:id="@+id/action_fragmentUsers_to_fragmentFindUser"
+            app:destination="@id/fragmentFindUser" />
+        <argument
+            android:name="userId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentProfile"
+        android:name="com.messengerkotlin.fragments.profile.Profile"
+        android:label="FragmentProfile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_fragmentProfile_to_fragmentNameEditor"
+            app:destination="@id/fragmentNameEditor" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentNameEditor"
+        android:name="com.messengerkotlin.fragments.profile.name_editor.NameEditor"
+        android:label="FragmentNameEditor"
+        tools:layout="@layout/fragment_name_editor"/>
+
+    <fragment
+        android:id="@+id/fragmentChatroom"
+        android:name="com.messengerkotlin.fragments.chatroom.Chatroom"
+        android:label="FragmentChatroom"
+        tools:layout="@layout/fragment_chatroom">
+        <argument
+            android:name="userId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentFindUser"
+        android:name="com.messengerkotlin.fragments.find_user.FindUser"
+        android:label="FragmentFindUser"
+        tools:layout="@layout/find_user">
+        <action
+            android:id="@+id/action_fragmentFindUser_to_fragmentChatroom"
+            app:destination="@id/fragmentChatroom" />
+        <argument
+            android:name="userId"
+            app:argType="string" />
+    </fragment>
+
+
+</navigation>

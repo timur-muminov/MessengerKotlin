@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/lightGray">
+
+       <include
+           layout="@layout/simple_appbar"/>
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="@string/username"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintHorizontal_bias="0.04"
+            app:layout_constraintBottom_toTopOf="@id/usernameEdit"
+            app:layout_constraintLeft_toLeftOf="@id/usernameEdit"
+            app:layout_constraintRight_toRightOf="@id/usernameEdit" />
+
+        <EditText
+            android:id="@+id/usernameEdit"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/loginformconf"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            app:layout_constraintBottom_toTopOf="@id/email"
+            app:layout_constraintLeft_toLeftOf="@id/emailEdit"
+            app:layout_constraintRight_toRightOf="@id/emailEdit"
+            tools:ignore="LabelFor,TextFields,SpeakableTextPresentCheck" />
+
+        <TextView
+            android:id="@+id/email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="@string/email"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/emailEdit"
+            app:layout_constraintHorizontal_bias="0.04"
+            app:layout_constraintLeft_toLeftOf="@id/emailEdit"
+            app:layout_constraintRight_toRightOf="@id/emailEdit" />
+
+        <EditText
+            android:id="@+id/emailEdit"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/loginformconf"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="LabelFor,TextFields,SpeakableTextPresentCheck" />
+
+        <TextView
+            android:id="@+id/password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="15dp"
+            android:text="@string/password"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/passwordEdit"
+            app:layout_constraintHorizontal_bias="0.04"
+            app:layout_constraintLeft_toLeftOf="@id/passwordEdit"
+            app:layout_constraintRight_toRightOf="@id/passwordEdit"
+            app:layout_constraintTop_toBottomOf="@id/emailEdit" />
+
+        <EditText
+            android:id="@+id/passwordEdit"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:background="@drawable/loginformconf"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            app:layout_constraintBottom_toTopOf="@id/startbtn"
+            app:layout_constraintLeft_toLeftOf="@id/emailEdit"
+            app:layout_constraintRight_toRightOf="@id/emailEdit"
+            tools:ignore="LabelFor,TextFields,SpeakableTextPresentCheck" />
+
+        <Button
+            android:id="@+id/startbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/loginstartbtnconf"
+            android:text="@string/sign_in"
+            android:textSize="17sp"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            app:layout_constraintLeft_toLeftOf="@id/passwordEdit"
+            app:layout_constraintRight_toRightOf="@id/passwordEdit"
+            app:layout_constraintTop_toBottomOf="@id/passwordEdit" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/findUserBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:layout_marginStart="13dp"
+            android:background="@null"
+            android:contentDescription="@string/back"
+            android:src="@drawable/ic_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/appbarName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:textColor="@color/black"
+            android:textSize="21sp"
+            android:text="@string/find_user"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <EditText
+        android:id="@+id/findUserKey"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appbar"
+        android:inputType="text"
+        android:textSize="14sp"
+        android:hint="@string/user_key"
+        android:importantForAutofill="no" />
+
+
+    <TextView
+        android:id="@+id/warningMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/user_not_found"
+        android:textSize="13sp"
+        android:visibility="gone"
+        android:textColor="@color/red"
+        app:layout_constraintTop_toBottomOf="@id/findUserKey"
+        app:layout_constraintStart_toStartOf="@id/findUserKey"
+        app:layout_constraintEnd_toEndOf="@id/findUserKey"/>
+
+    <Button
+        android:id="@+id/findUserBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:background="@null"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/back"
+        android:text="@string/find_user_button"
+        android:textSize="12sp"
+        app:layout_constraintTop_toTopOf="@id/findUserKey"
+        app:layout_constraintStart_toEndOf="@id/findUserKey"
+        app:layout_constraintBottom_toBottomOf="@id/findUserKey"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

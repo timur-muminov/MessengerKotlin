@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="email">Email</string>
+    <string name="LogIn">Log in</string>
+    <string name="find">Найти</string>
+    <string name="photo">photo</string>
+    <string name="no_such_username">No such username</string>
+    <string name="back">Back</string>
+    <string name="enter_message">Enter message</string>
+    <string name="send">Send</string>
+    <string name="password">Password</string>
+    <string name="user_key">User key</string>
+    <string name="sign_in">Sign In</string>
+    <string name="App_name">Chat</string>
+    <string name="registration">registration</string>
+    <string name="logout">Logout</string>
+</resources>

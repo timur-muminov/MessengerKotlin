@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="find_user">Найти пользователя</string>
+    <string name="find_user_button">Найти</string>
+    <string name="username">имя пользователя</string>
+    <string name="user_not_found">пользователь не найден</string>
+    <string name="nameStatic">Имя:</string>
+    <string name="id">id:</string>
+    <string name="id_already_exists">id already exists</string>
+    <string name="find_user_russian">Find user</string>
+</resources>
