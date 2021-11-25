@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.messengerkotlin.R
+import com.messengerkotlin.core.ViewModelFactory
 import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.databinding.FragmentRegistrationBinding
 
@@ -20,7 +21,7 @@ class Registration : Fragment(R.layout.fragment_registration){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentRegistrationBinding.bind(view)
-        val viewModel = ViewModelProvider(this).get(RegistrationViewModel::class.java)
+        val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(RegistrationViewModel::class.java)
 
         binding.startbtn.setOnClickListener{
             val name = binding.usernameEdit.text.toString()

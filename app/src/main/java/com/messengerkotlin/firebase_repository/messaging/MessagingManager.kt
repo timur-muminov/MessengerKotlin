@@ -3,9 +3,10 @@ package com.messengerkotlin.firebase_repository.messaging
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.enums.Status
+import com.messengerkotlin.firebase_repository.UserStatusRepository
 import com.messengerkotlin.models.UserModel
 
-class MessagingManager(var chatId: String, otherUserId: String, currentUserModel: UserModel) {
+class MessagingManager(userStatusRepository: UserStatusRepository, var chatId: String, otherUserId: String, currentUserModel: UserModel) {
 
     private val commonReference: DatabaseReference = FirebaseDatabase.getInstance().reference
 
@@ -15,8 +16,8 @@ class MessagingManager(var chatId: String, otherUserId: String, currentUserModel
     private val notificationManager: NotificationManager = NotificationManager(currentUserModel, otherUserId)
 
     init {
-        messageMap["sender"] = currentUserModel.id
-        UserManager.firebaseRepository?.getStatus(currentUserModel.id){ otherUserStatus = it}
+        messageMap["senderId"] = currentUserModel.id
+        userStatusRepository.getStatus(currentUserModel.id){ otherUserStatus = it}
     }
 
     fun sendMessage(message: String){

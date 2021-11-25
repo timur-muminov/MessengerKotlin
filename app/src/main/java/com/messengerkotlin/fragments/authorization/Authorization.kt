@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.messengerkotlin.R
+import com.messengerkotlin.core.ViewModelFactory
 import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.databinding.FragmentAuthBinding
 
@@ -17,7 +18,7 @@ class Authorization : Fragment(R.layout.fragment_auth) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentAuthBinding.bind(view)
-        val viewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
+        val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(AuthViewModel::class.java)
 
         binding.registration.setOnClickListener {
             Navigation.findNavController(

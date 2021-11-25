@@ -46,6 +46,7 @@ class UsersAdapter(var onItemTouched: (String) -> Unit) : ListAdapter<UserModel,
 
             binding.name.text = userModel.username
             binding.lastMessage.text = userModel.lastMessage
+
             itemView.setOnClickListener {
                 onItemTouched(userModel.id)
             }

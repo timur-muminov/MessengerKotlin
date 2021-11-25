@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.messengerkotlin.R
+import com.messengerkotlin.core.ViewModelFactory
 import com.messengerkotlin.databinding.FragmentProfileBinding
 
 class Profile : Fragment(R.layout.fragment_profile) {
@@ -22,7 +23,7 @@ class Profile : Fragment(R.layout.fragment_profile) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        viewModel = ViewModelProvider(this,ViewModelFactory(null)).get(ProfileViewModel::class.java)
         launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri ->
             viewModel.loadProfileImage(uri, requireActivity().contentResolver)
         }
@@ -30,7 +31,7 @@ class Profile : Fragment(R.layout.fragment_profile) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentProfileBinding.bind(view)
-        val viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(ProfileViewModel::class.java)
 
         binding.toolbar.inflateMenu(R.menu.menu_profile)
         binding.toolbar.setOnMenuItemClickListener { item ->

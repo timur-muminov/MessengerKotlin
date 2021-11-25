@@ -62,7 +62,7 @@
 
     <fragment
         android:id="@+id/fragmentNameEditor"
-        android:name="com.messengerkotlin.fragments.profile.name_editor.NameEditor"
+        android:name="com.messengerkotlin.fragments.name_editor.NameEditor"
         android:label="FragmentNameEditor"
         tools:layout="@layout/fragment_name_editor"/>
 
@@ -71,9 +71,6 @@
         android:name="com.messengerkotlin.fragments.chatroom.Chatroom"
         android:label="FragmentChatroom"
         tools:layout="@layout/fragment_chatroom">
-        <argument
-            android:name="userId"
-            app:argType="string" />
     </fragment>
 
     <fragment

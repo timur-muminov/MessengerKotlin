@@ -1,10 +1,11 @@
-package com.messengerkotlin.fragments.profile.name_editor
+package com.messengerkotlin.fragments.name_editor
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.messengerkotlin.R
+import com.messengerkotlin.core.ViewModelFactory
 import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.databinding.FragmentNameEditorBinding
 
@@ -15,7 +16,7 @@ class NameEditor : Fragment(R.layout.fragment_name_editor) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentNameEditorBinding.bind(view)
-        val viewModel = ViewModelProvider(this).get(NameEditorViewModel::class.java)
+        val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(NameEditorViewModel::class.java)
 
         viewModel.currentUserLiveData.observe(viewLifecycleOwner){ userModel ->
             binding.editName.setText(userModel.username)

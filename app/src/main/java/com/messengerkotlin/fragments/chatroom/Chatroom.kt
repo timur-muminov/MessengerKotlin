@@ -22,7 +22,7 @@ class Chatroom : Fragment(R.layout.fragment_chatroom) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentChatroomBinding.bind(view)
-        val receiverId = arguments?.getString("id")
+        val receiverId = arguments?.getString("receiverId")
         val viewModel = ViewModelProvider(
             this,
             ViewModelFactory(receiverId!!)
@@ -36,7 +36,7 @@ class Chatroom : Fragment(R.layout.fragment_chatroom) {
                 .into(binding.profileImage)
         }
 
-
+        chat = binding.chatRecycler
         val linearLayoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL,false)
         linearLayoutManager.stackFromEnd = true
         chat.layoutManager = linearLayoutManager
@@ -51,7 +51,7 @@ class Chatroom : Fragment(R.layout.fragment_chatroom) {
                 viewModel.sendMessage(message)
                 binding.sendMessageEdit.setText("")
             } else {
-                Toast.makeText(requireContext(), "You can not send empty message", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "You can not send empty message", Toast.LENGTH_SHORT).show()
             }
         }
 

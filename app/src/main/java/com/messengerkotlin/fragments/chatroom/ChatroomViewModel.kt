@@ -3,29 +3,54 @@ package com.messengerkotlin.fragments.chatroom
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.messengerkotlin.firebase_repository.*
 import com.messengerkotlin.firebase_repository.messaging.MessagingManager
 import com.messengerkotlin.models.MessageModel
 import com.messengerkotlin.models.UserModel
+import kotlinx.coroutines.launch
 
-class ChatroomViewModel(var userId: String): ViewModel() {
+class ChatroomViewModel(
+    authenticationManager: AuthenticationManager,
+    currentUserRepository: CurrentUserRepository,
+    userStatusRepository: UserStatusRepository,
+    otherUserRepository: OtherUserRepository,
+    chatRepository: ChatRepository,
+    var otherUserId: String?
+) : ViewModel() {
 
     private val _otherUserMutableLiveData: MutableLiveData<UserModel> = MutableLiveData()
     var otherUserLiveData: LiveData<UserModel> = _otherUserMutableLiveData
 
-    private val _messagesMutableLiveData: MutableLiveData<ArrayList<MessageModel>> = MutableLiveData()
+    private val _messagesMutableLiveData: MutableLiveData<ArrayList<MessageModel>> =
+        MutableLiveData()
     var messagesLiveData: LiveData<ArrayList<MessageModel>> = _messagesMutableLiveData
 
-    private lateinit var messagingManager: MessagingManager
+    private var messagingManager: MessagingManager? = null
 
     init {
-        UserManager.firebaseRepository?.getOtherUserInfo(userId){ userModel ->
-            _otherUserMutableLiveData.postValue(userModel)
-            UserManager.firebaseRepository?.findChatById(userId){ messagingManager = MessagingManager(it, userId ,userModel!!) }
+        authenticationManager.currentUserId?.let { currentUserId ->
+            otherUserId?.let { otherUserId ->
+                viewModelScope.launch {
+                    _otherUserMutableLiveData.postValue(otherUserRepository.getOtherUserById(otherUserId))
+
+                    val userModel = currentUserRepository.getCurrentUser(currentUserId)
+                    val chatId = chatRepository.findChatById(currentUserId, otherUserId)
+                    messagingManager = userModel?.let {
+                        MessagingManager(
+                            userStatusRepository,
+                            chatId,
+                            otherUserId,
+                            userModel
+                        )
+                    }
+                    _messagesMutableLiveData.postValue(chatRepository.getMessagesFromChat(currentUserId, otherUserId))
+                }
+            }
         }
-        UserManager.firebaseRepository?.getMessagesFromChat(userId){_messagesMutableLiveData.postValue(it)}
     }
 
     fun sendMessage(message: String) {
-        messagingManager.sendMessage(message)
+        messagingManager?.sendMessage(message)
     }
 }

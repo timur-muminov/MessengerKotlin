@@ -6,14 +6,12 @@ import androidx.lifecycle.ViewModel
 import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.firebase_repository.AuthenticationManager
 
-class AuthViewModel : ViewModel(){
+class AuthViewModel(private val authenticationManager: AuthenticationManager) : ViewModel(){
 
     private val _statusMutableLiveData: MutableLiveData<CommonStatus> = MutableLiveData()
     var statusLiveData: LiveData<CommonStatus> = _statusMutableLiveData
 
-    private val authManager = AuthenticationManager()
-
     fun signIn(email: String, password: String){
-        authManager.signIn(email, password, _statusMutableLiveData::postValue)
+        authenticationManager.signIn(email, password, _statusMutableLiveData::postValue)
     }
 }

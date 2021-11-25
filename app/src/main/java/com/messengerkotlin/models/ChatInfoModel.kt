@@ -1,6 +1,6 @@
 package com.messengerkotlin.models
 
 data class ChatInfoModel(
-    val chatId: String,
-    val otherUserId: String
+    var chatId: String = "",
+    var otherUserId: String = ""
 )

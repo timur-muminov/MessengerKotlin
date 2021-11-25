@@ -1,5 +1,6 @@
 package com.messengerkotlin.fragments.chatroom.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,15 +12,16 @@ import com.messengerkotlin.models.MessageModel
 
 class ChatRecyclerAdapter(private var messageList: ArrayList<MessageModel>) : RecyclerView.Adapter<ChatRecyclerAdapter.ViewHolder>() {
 
-    private val right: Int = 1
-    private val left: Int = 0
+    private val RIGHT: Int = 1
+    private val LEFT: Int = 0
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid
 
 
     override fun onCreateViewHolder(parent: ViewGroup , viewType: Int) : ViewHolder {
-        if (viewType == right) {
-            return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.sent_message_item, parent, false))
+        return if (viewType == RIGHT) {
+            ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.sent_message_item, parent, false))
         } else {
-            return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.received_message_item, parent, false))
+            ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.received_message_item, parent, false))
         }
     }
 
@@ -27,13 +29,11 @@ class ChatRecyclerAdapter(private var messageList: ArrayList<MessageModel>) : Re
         holder.message.text = messageList[position].message
     }
 
-
     override fun getItemViewType(position: Int) : Int {
-        val user = FirebaseAuth.getInstance().currentUser
-        return if (messageList[position].senderId == user?.uid) {
-            right;
+        return if (messageList[position].senderId == userId) {
+            RIGHT
         } else {
-            left;
+            LEFT
         }
     }
 
