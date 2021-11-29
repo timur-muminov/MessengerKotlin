@@ -19,8 +19,8 @@ class NameEditor : Fragment(R.layout.fragment_name_editor) {
         val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(NameEditorViewModel::class.java)
 
         viewModel.currentUserLiveData.observe(viewLifecycleOwner){ userModel ->
-            binding.editName.setText(userModel.username)
-            binding.editUserKey.setText(userModel.userkey?: "")
+            binding.editName.setText(userModel?.username)
+            binding.editUserKey.setText(userModel?.userkey?: "")
         }
 
         binding.acceptBtn.setOnClickListener{

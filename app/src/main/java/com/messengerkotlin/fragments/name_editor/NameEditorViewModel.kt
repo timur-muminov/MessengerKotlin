@@ -15,8 +15,8 @@ class NameEditorViewModel(
     var currentUserRepository: CurrentUserRepository
 ) : ViewModel() {
 
-    private val _currentUserMutableLiveData: MutableLiveData<UserModel> = MutableLiveData()
-    var currentUserLiveData: LiveData<UserModel> = _currentUserMutableLiveData
+    private val _currentUserMutableLiveData: MutableLiveData<UserModel?> = MutableLiveData()
+    var currentUserLiveData: LiveData<UserModel?> = _currentUserMutableLiveData
 
     private val _editUserKeyStatusMutableLiveData: MutableLiveData<CommonStatus> = MutableLiveData()
     var editUserKeyStatusLiveData: LiveData<CommonStatus> = _editUserKeyStatusMutableLiveData
@@ -26,13 +26,12 @@ class NameEditorViewModel(
     init {
         authenticationManager.currentUserId?.let {
             viewModelScope.launch {
-                currentUserModel = currentUserRepository.getCurrentUser(it)
-                _currentUserMutableLiveData.postValue(currentUserModel)
+                currentUserRepository.getCurrentUser(it) { _currentUserMutableLiveData.postValue(it) }
             }
         }
     }
 
-    fun editProfile(username: String, userkey: String) {
+    suspend fun editProfile(username: String, userkey: String) {
         if (username != currentUserModel?.username) {
             authenticationManager.currentUserId?.let {
                 currentUserRepository.editUsername(
@@ -42,12 +41,7 @@ class NameEditorViewModel(
             }
         }
         if (userkey != currentUserModel?.userkey) {
-            authenticationManager.currentUserId?.let { it1 ->
-                currentUserRepository.editUserKey(
-                    it1,
-                    userkey
-                ) { it2 -> _editUserKeyStatusMutableLiveData.postValue(it2) }
-            }
+            _editUserKeyStatusMutableLiveData.postValue(currentUserRepository.editUserKey(userkey))
         }
     }
 }

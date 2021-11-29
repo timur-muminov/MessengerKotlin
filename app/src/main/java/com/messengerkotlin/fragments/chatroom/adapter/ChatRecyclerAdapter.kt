@@ -10,7 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.messengerkotlin.R
 import com.messengerkotlin.models.MessageModel
 
-class ChatRecyclerAdapter(private var messageList: ArrayList<MessageModel>) : RecyclerView.Adapter<ChatRecyclerAdapter.ViewHolder>() {
+class ChatRecyclerAdapter(private var messageList: List<MessageModel>) : RecyclerView.Adapter<ChatRecyclerAdapter.ViewHolder>() {
 
     private val RIGHT: Int = 1
     private val LEFT: Int = 0

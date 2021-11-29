@@ -4,29 +4,41 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.messengerkotlin.core.EventResponse
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-fun DatabaseReference.onValueEvent(onDataChanged: (DataSnapshot) -> Unit = {}, onCancelled: (DatabaseError) -> Unit = {}) {
+suspend fun DatabaseReference.onValueEventFlow(): Flow<EventResponse> = callbackFlow {
 
-    addValueEventListener(object : ValueEventListener {
+    val valueEventListener = object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
-            onDataChanged(snapshot)
+            trySend(EventResponse.Changed(snapshot))
         }
 
         override fun onCancelled(error: DatabaseError) {
-            onCancelled(error)
+            trySend(EventResponse.Cancelled(error))
         }
-    })
+    }
+    addValueEventListener(valueEventListener)
+    awaitClose { removeEventListener(valueEventListener) }
 }
 
-fun DatabaseReference.onSingleEvent(onDataChanged: (DataSnapshot) -> Unit = {}, onCancelled: () -> Unit = {}) {
+suspend fun DatabaseReference.onSingleEvent(): EventResponse =
+    suspendCoroutine { continuation ->
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                continuation.resume(EventResponse.Changed(snapshot))
+            }
 
-    addListenerForSingleValueEvent(object : ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {
-            onDataChanged(snapshot)
+            override fun onCancelled(error: DatabaseError) {
+                continuation.resume(EventResponse.Cancelled(error))
+            }
         }
+        addListenerForSingleValueEvent(valueEventListener)
+    }
 
-        override fun onCancelled(error: DatabaseError) {
-            onCancelled()
-        }
-    })
-}

@@ -3,12 +3,13 @@ package com.messengerkotlin.firebase_repository
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
+import com.messengerkotlin.core.EventResponse
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
-import com.messengerkotlin.firebase_repository.extensions.onValueEvent
+import com.messengerkotlin.firebase_repository.extensions.onValueEventFlow
 import com.messengerkotlin.models.ChatInfoModel
 import com.messengerkotlin.models.UserModel
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.flow.*
+import kotlin.collections.forEach
 
 class OtherUserRepository {
 
@@ -18,51 +19,45 @@ class OtherUserRepository {
         currentUserId: String
     ): HashMap<String, UserModel> {
         val users: HashMap<String, UserModel> = HashMap()
-        val dataSnapshot = getDataSnapshotById(currentUserId)
-        dataSnapshot.children.mapNotNull { snapshot -> snapshot.getValue(ChatInfoModel::class.java) }
-            .forEach { userModel ->
-                getOtherUserById(userModel.otherUserId)?.let {
+        val dataSnapshot = getDataSnapshotById(currentUserId) // todo warning
+        dataSnapshot
+            .mapNotNull { snapshot -> snapshot.getValue(ChatInfoModel::class.java) }
+            .collect { chatInfoModel ->
+                getOtherUserById(chatInfoModel.otherUserId)?.let {
                     users[it.id] = it
                 }
             }
         return users
     }
 
-    private suspend fun getDataSnapshotById(currentUserId: String): DataSnapshot =
-        suspendCoroutine { continuation ->
-            rootReference.child("UserChatsRegister").child(currentUserId)
-                .onValueEvent(onDataChanged = { continuation.resume(it) })
+    private suspend fun getDataSnapshotById(currentUserId: String): Flow<DataSnapshot> =
+        rootReference.child("UserChatsRegister").child(currentUserId).onValueEventFlow()
+            .filter { it is EventResponse.Changed }.map { (it as EventResponse.Changed).snapshot }
+
+
+    suspend fun getOtherUserById(userId: String): UserModel? {
+        when (val eventResponse = rootReference.child("Users").child(userId).onSingleEvent()) {
+            is EventResponse.Cancelled -> throw IllegalStateException()
+            is EventResponse.Changed -> return eventResponse.snapshot.getValue(UserModel::class.java)
         }
+    }
 
-
-    suspend fun getOtherUserById(userId: String): UserModel? =
-        suspendCoroutine { continuation ->
-            rootReference.child("Users").child(userId)
-                .onSingleEvent(onDataChanged = { dataSnapshot ->
-                    continuation.resume(dataSnapshot.getValue(UserModel::class.java))
-                })
-        }
-
-    fun getOtherUserIdByUserkey(
+    suspend fun getOtherUserIdByUserkey(
         currentUserId: String,
         userKey: String,
-        callback: (String?) -> Unit
-    ) {
-        var i = 0
-        rootReference.child("Users").onSingleEvent(onDataChanged = { dataSnapshot ->
-            for (snapshot in dataSnapshot.children) {
-                val userModel = snapshot.getValue(UserModel::class.java)
-                userModel?.userkey?.let {
-                    if (userModel.id != currentUserId)
-                        if (it == userKey) {
-                            i++
-                            callback(userModel.id)
-                        }
-                }
-
-
+    ): String? {
+        when (val response = rootReference.child("Users").onSingleEvent()) {
+            is EventResponse.Cancelled -> throw java.lang.IllegalStateException()
+            is EventResponse.Changed -> {
+                response.snapshot.children
+                    .mapNotNull { child -> child.getValue(UserModel::class.java) }
+                    .filter { userModel -> userModel.id != currentUserId && userModel.userkey == userKey }
+                    .map { userModel ->
+                        return userModel.id
+                    }
+                return null
             }
-            if (i == 0) callback(null)
-        })
+        }
     }
+
 }

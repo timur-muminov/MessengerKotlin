@@ -22,9 +22,9 @@ class ChatroomViewModel(
     private val _otherUserMutableLiveData: MutableLiveData<UserModel> = MutableLiveData()
     var otherUserLiveData: LiveData<UserModel> = _otherUserMutableLiveData
 
-    private val _messagesMutableLiveData: MutableLiveData<ArrayList<MessageModel>> =
+    private val _messagesMutableLiveData: MutableLiveData<List<MessageModel>> =
         MutableLiveData()
-    var messagesLiveData: LiveData<ArrayList<MessageModel>> = _messagesMutableLiveData
+    var messagesLiveData: LiveData<List<MessageModel>> = _messagesMutableLiveData
 
     private var messagingManager: MessagingManager? = null
 
@@ -44,7 +44,17 @@ class ChatroomViewModel(
                             userModel
                         )
                     }
-                    _messagesMutableLiveData.postValue(chatRepository.getMessagesFromChat(currentUserId, otherUserId))
+
+                    val messages = chatRepository.getMessagesFromStorageChat(chatId)
+                    if(messages.size != 0) {
+                        messages.removeAt(messages.size - 1)
+                    }
+                    chatRepository.getActualMessage(chatId){ messageModel ->
+                        messageModel?.let {
+                            messages.add(messageModel)
+                            _messagesMutableLiveData.postValue(messages)
+                        }
+                    }
                 }
             }
         }

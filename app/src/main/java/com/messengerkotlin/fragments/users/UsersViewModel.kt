@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.messengerkotlin.core.enums.Status
 import com.messengerkotlin.firebase_repository.*
+import com.messengerkotlin.models.MessageModel
 import com.messengerkotlin.models.UserModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class UsersViewModel(
     private var authenticationManager: AuthenticationManager,
@@ -34,22 +34,32 @@ class UsersViewModel(
             )
 
             viewModelScope.launch {
-                _currentUserMutableLiveData.postValue(currentUserRepository.getCurrentUser(it))
-                _otherUsersMutableLiveData.postValue(map(otherUserRepository.getOtherUsersInfoFromChatsRegister(it)))
+                currentUserRepository.getCurrentUser(it){_currentUserMutableLiveData.postValue(it)}
+                map(otherUserRepository.getOtherUsersInfoFromChatsRegister(it)){_otherUsersMutableLiveData.postValue(it)}
             }
         }
     }
 
-    private suspend fun map(mapUsers: HashMap<String, UserModel>): List<UserModel>? {
+    private suspend fun map(
+        mapUsers: HashMap<String, UserModel>,
+        callback: (List<UserModel>?) -> Unit
+    ) {
         authenticationManager.currentUserId?.let { currentUserId ->
-            mapUsers.forEach {
-                val messageModel = chatRepository.getLastMessage(currentUserId, it.key)
-                it.value.lastMessage = messageModel?.message ?: ""
+            var count = 0
+            mapUsers.forEach { map ->
+                val chatId = chatRepository.findChatById(currentUserId, map.key)
+                chatRepository.getActualMessage(chatId) { messageModel ->
+                    map.value.lastMessage = messageModel?.message ?: ""
+                    if (mapUsers.size == count) {
+                        callback(ArrayList(mapUsers.values))
+                    }
+                    count++
+                }
+
             }
-            return ArrayList(mapUsers.values)
         }
-        return null
     }
+
 }
 
 

@@ -6,11 +6,12 @@ import com.messengerkotlin.core.enums.Status
 import com.messengerkotlin.firebase_repository.UserStatusRepository
 import com.messengerkotlin.models.UserModel
 
-class MessagingManager(userStatusRepository: UserStatusRepository, var chatId: String, otherUserId: String, currentUserModel: UserModel) {
+class MessagingManager(userStatusRepository: UserStatusRepository, chatId: String, otherUserId: String, currentUserModel: UserModel) {
 
-    private val commonReference: DatabaseReference = FirebaseDatabase.getInstance().reference
+    private val chatReference: DatabaseReference = FirebaseDatabase.getInstance().reference.child("Chats").child(chatId)
 
-    private var chatsReference = commonReference.child("Chats")
+    private var actualChatReference = chatReference.child("LastMessage")
+    private var storageChatReference = chatReference.child("MessageStorage")
     private lateinit var otherUserStatus: Status
     private val messageMap: HashMap<String, String> = HashMap()
     private val notificationManager: NotificationManager = NotificationManager(currentUserModel, otherUserId)
@@ -22,7 +23,8 @@ class MessagingManager(userStatusRepository: UserStatusRepository, var chatId: S
 
     fun sendMessage(message: String){
         messageMap["message"] = message
-        chatsReference.child(chatId).push().setValue(messageMap)
+        actualChatReference.setValue(messageMap)
+        storageChatReference.push().setValue(messageMap)
 
         if(otherUserStatus == Status.OFFLINE){
             notificationManager.sendNotification(message)
