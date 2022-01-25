@@ -1,47 +1,53 @@
 package com.messengerkotlin.firebase_repository.messaging
 
+import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.EventResponse
+import com.messengerkotlin.core.firebase_hierarchy.FBNames
+import com.messengerkotlin.firebase_repository.OtherUserRepository
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
-import com.messengerkotlin.models.Data
-import com.messengerkotlin.models.Sender
-import com.messengerkotlin.models.UserModel
+import com.messengerkotlin.models.*
 import com.messengerkotlin.network_service.API
-import com.messengerkotlin.network_service.NetworkService
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.lang.IllegalStateException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class NotificationManager(var currentUserModel: UserModel, var otherUserId: String) {
+class NotificationManager(private val fbNames: FBNames, private val api: API) {
 
     private val commonReference: DatabaseReference = FirebaseDatabase.getInstance().reference
+    private var tokenReference: DatabaseReference? = null
 
-    private val tokenReference: DatabaseReference =
-        commonReference.child("Users").child(otherUserId).child("token")
-    private val apiService: API = NetworkService.apiService
+    var currentUserModel: UserModel? = null
+    private var otherUserId: String = ""
 
-    suspend fun sendNotification(message: String) {
-        when(val response = tokenReference.onSingleEvent()){
+    fun create(otherUserId: String) {
+        this.otherUserId = otherUserId
+        tokenReference = commonReference.child(fbNames.users).child(otherUserId).child("token")
+    }
+
+    suspend fun sendNotification(message: String) = withContext(Dispatchers.IO) {
+        when (val response = tokenReference?.onSingleEvent()) {
             is EventResponse.Cancelled -> throw IllegalStateException()
             is EventResponse.Changed -> {
-                val token: String = response.snapshot.getValue(String::class.java).toString()
-                val data = Data(
-                    otherUserId,
-                    currentUserModel.id,
-                    currentUserModel.username,
-                    currentUserModel.imageurl,
-                    message
-                )
-                val sender = Sender(data, token)
-                apiService.sendNotification(sender).enqueue(object : Callback<ResponseBody> {
-                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {}
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {}
-                })
-            }
-        }
 
+                val token: String? = response.snapshot.getValue(String::class.java)
+                Log.e("message"," token received " + token)
+                currentUserModel?.let { userModel ->
+                    token?.let { tok ->
+                        val data = DataModel(
+                            otherUserId,
+                            userModel.id,
+                            userModel.username,
+                            userModel.imageurl?: "",
+                            message
+                        )
+                        Log.e("message"," tok = " + data)
+                        val sender = SenderModel(tok, data)
+                        api.sendNotification(sender)
+                    }
+                }
+            }
+            else -> {}
+        }
     }
 }

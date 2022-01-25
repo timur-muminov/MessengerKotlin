@@ -1,59 +1,74 @@
 package com.messengerkotlin.fragments.chatroom
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.messengerkotlin.firebase_repository.*
+import com.messengerkotlin.firebase_repository.ChatRepository
+import com.messengerkotlin.firebase_repository.CurrentUserRepository
+import com.messengerkotlin.firebase_repository.OtherUserRepository
+import com.messengerkotlin.firebase_repository.UserStatusRepository
+import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.firebase_repository.messaging.MessagingManager
 import com.messengerkotlin.models.MessageModel
 import com.messengerkotlin.models.UserModel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ChatroomViewModel(
-    authenticationManager: AuthenticationManager,
-    currentUserRepository: CurrentUserRepository,
-    userStatusRepository: UserStatusRepository,
-    otherUserRepository: OtherUserRepository,
-    chatRepository: ChatRepository,
-    var otherUserId: String?
+    private val authenticationManager: AuthenticationManager,
+    private val currentUserRepository: CurrentUserRepository,
+    private val userStatusRepository: UserStatusRepository,
+    private val otherUserRepository: OtherUserRepository,
+    private val chatRepository: ChatRepository,
+    private val messagingManager: MessagingManager,
+    private var otherUserId: String
 ) : ViewModel() {
 
-    private val _otherUserMutableLiveData: MutableLiveData<UserModel> = MutableLiveData()
-    var otherUserLiveData: LiveData<UserModel> = _otherUserMutableLiveData
+    private val _otherUserMutableStateFlow: MutableStateFlow<UserModel?> = MutableStateFlow(null)
+    val otherUserStateFlow: StateFlow<UserModel?> = _otherUserMutableStateFlow
 
-    private val _messagesMutableLiveData: MutableLiveData<List<MessageModel>> =
-        MutableLiveData()
-    var messagesLiveData: LiveData<List<MessageModel>> = _messagesMutableLiveData
-
-    private var messagingManager: MessagingManager? = null
+    private val _messagesMutableSharedFlow: MutableSharedFlow<List<MessageModel>> =
+        MutableSharedFlow(0)
+    val messagesSharedFlow: SharedFlow<List<MessageModel>> = _messagesMutableSharedFlow
 
     init {
+        setChat()
+    }
+
+    private fun setChat() {
         authenticationManager.currentUserId?.let { currentUserId ->
-            otherUserId?.let { otherUserId ->
-                viewModelScope.launch {
-                    _otherUserMutableLiveData.postValue(otherUserRepository.getOtherUserById(otherUserId))
+            viewModelScope.launch {
+                launch {
+                    _otherUserMutableStateFlow.value = otherUserRepository.getOtherUserById(otherUserId)
+                }
 
-                    val userModel = currentUserRepository.getCurrentUser(currentUserId)
-                    val chatId = chatRepository.findChatById(currentUserId, otherUserId)
-                    messagingManager = userModel?.let {
-                        MessagingManager(
-                            userStatusRepository,
-                            chatId,
-                            otherUserId,
-                            userModel
-                        )
+                val chatInfoModel = chatRepository.findChatById(currentUserId, otherUserId)
+
+                chatInfoModel.otherUserId.let { otherUserId ->
+                    launch {
+                        userStatusRepository.getStatus(otherUserId).collect { status ->
+                            messagingManager.otherUserStatus = status
+                        }
                     }
+                    launch {
+                        currentUserRepository.getCurrentUser(currentUserId).collect { currentUserModel ->
+                            messagingManager.create(currentUserId,chatInfoModel.chatId, otherUserId, currentUserModel)
 
-                    val messages = chatRepository.getMessagesFromStorageChat(chatId)
-                    if(messages.size != 0) {
+                        }
+                    }
+                }
+
+                launch {
+                    val messages = chatRepository.getMessagesFromStorageChat(chatInfoModel.chatId)
+                    if (messages.size != 0) {
                         messages.removeAt(messages.size - 1)
                     }
-                    chatRepository.getActualMessage(chatId){ messageModel ->
-                        messageModel?.let {
-                            messages.add(messageModel)
-                            _messagesMutableLiveData.postValue(messages)
-                        }
+
+                    launch {
+                        chatRepository.getLastMessage(chatInfoModel.chatId)
+                            .collect { messageModel ->
+                                messages.add(messageModel)
+                                _messagesMutableSharedFlow.emit(messages)
+                            }
                     }
                 }
             }
@@ -61,6 +76,8 @@ class ChatroomViewModel(
     }
 
     fun sendMessage(message: String) {
-        messagingManager?.sendMessage(message)
+        viewModelScope.launch {
+            messagingManager.sendMessage(message)
+        }
     }
 }

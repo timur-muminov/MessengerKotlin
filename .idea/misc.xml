@@ -5,6 +5,8 @@
       <map>
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/drawable/ic_addphoto.xml" value="0.35625" />
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/drawable/ic_icon1.xml" value="0.38125" />
+        <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/drawable/ic_launcher.xml" value="0.38125" />
+        <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/drawable/ic_logo.xml" value="0.24270833333333333" />
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/layout/activity_main.xml" value="0.3359375" />
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/layout/simple_appbar.xml" value="0.33" />
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/layouts/authorization/layout/fragment_auth.xml" value="0.25" />
@@ -19,6 +21,7 @@
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/layouts/users/layout/user_item.xml" value="0.3651041666666667" />
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/menu/menu_profile.xml" value="0.3359375" />
         <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/menu/menu_users.xml" value="0.3651041666666667" />
+        <entry key="..\:/Users/Timur/AndroidStudioProjects/MessengerKotlin/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.38125" />
       </map>
     </option>
   </component>

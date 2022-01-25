@@ -1,8 +1,9 @@
 package com.messengerkotlin.fragments.find_user
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.messengerkotlin.firebase_repository.AuthenticationManager
+import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.firebase_repository.ChatRepository
 import com.messengerkotlin.firebase_repository.OtherUserRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,16 +22,15 @@ class FindUserViewModel(
 
     fun findUser(userKey: String) {
         authenticationManager.currentUserId?.let { currentUserId ->
-            otherUserRepository.getOtherUserIdByUserkey(currentUserId, userKey) { otherUserId ->
+            viewModelScope.launch {
+                val otherUserId = otherUserRepository.getOtherUserIdByUserkey(userKey)
                 otherUserId?.let {
                     chatRepository.createChats(
                         currentUserId,
                         otherUserId
                     )
                 }
-                viewModelScope.launch {
-                    _findUserCallbackMutableSharedFlow.emit(otherUserId)
-                }
+                _findUserCallbackMutableSharedFlow.emit(otherUserId)
             }
         }
     }

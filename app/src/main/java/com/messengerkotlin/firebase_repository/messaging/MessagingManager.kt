@@ -1,30 +1,36 @@
 package com.messengerkotlin.firebase_repository.messaging
 
+import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.enums.Status
-import com.messengerkotlin.firebase_repository.UserStatusRepository
+import com.messengerkotlin.core.firebase_hierarchy.FBNames
 import com.messengerkotlin.models.UserModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class MessagingManager(userStatusRepository: UserStatusRepository, chatId: String, otherUserId: String, currentUserModel: UserModel) {
+class MessagingManager(private val fbNames: FBNames, private val notificationManager: NotificationManager) {
 
-    private val chatReference: DatabaseReference = FirebaseDatabase.getInstance().reference.child("Chats").child(chatId)
-
-    private var actualChatReference = chatReference.child("LastMessage")
-    private var storageChatReference = chatReference.child("MessageStorage")
-    private lateinit var otherUserStatus: Status
+    private var chatReference: DatabaseReference? = null
+    private var actualChatReference: DatabaseReference? = null
+    private var storageChatReference: DatabaseReference? = null
+    var otherUserStatus: Status = Status.OFFLINE
     private val messageMap: HashMap<String, String> = HashMap()
-    private val notificationManager: NotificationManager = NotificationManager(currentUserModel, otherUserId)
 
-    init {
-        messageMap["senderId"] = currentUserModel.id
-        userStatusRepository.getStatus(currentUserModel.id){ otherUserStatus = it}
+    fun create(currentUserId: String,chatId: String, otherUserId: String, currentUserModel: UserModel){
+        messageMap["senderId"] = currentUserId
+        chatReference = FirebaseDatabase.getInstance().reference.child(fbNames.chats).child(chatId)
+        actualChatReference = chatReference?.child(fbNames.lastMessages)
+        storageChatReference = chatReference?.child(fbNames.storageMessages)
+
+        notificationManager.create(otherUserId)
+        notificationManager.currentUserModel = currentUserModel
     }
 
-    fun sendMessage(message: String){
+    suspend fun sendMessage(message: String) = withContext(Dispatchers.IO){
         messageMap["message"] = message
-        actualChatReference.setValue(messageMap)
-        storageChatReference.push().setValue(messageMap)
+        actualChatReference?.setValue(messageMap)
+        storageChatReference?.push()?.setValue(messageMap)
 
         if(otherUserStatus == Status.OFFLINE){
             notificationManager.sendNotification(message)

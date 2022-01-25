@@ -2,23 +2,21 @@ package com.messengerkotlin.fragments.authorization
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.messengerkotlin.R
-import com.messengerkotlin.core.ViewModelFactory
-import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.databinding.FragmentAuthBinding
+import com.messengerkotlin.firebase_repository.auth_manager.enums.AuthStatus
+import com.messengerkotlin.fragments.BaseFragment
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class Authorization : Fragment(R.layout.fragment_auth) {
+class Authorization : BaseFragment<FragmentAuthBinding>(FragmentAuthBinding::inflate) {
 
-    private var _binding: FragmentAuthBinding? = null
-    private val binding get() = _binding!!
+    private val viewModel: AuthViewModel by viewModel()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        _binding = FragmentAuthBinding.bind(view)
-        val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(AuthViewModel::class.java)
 
         binding.registration.setOnClickListener {
             Navigation.findNavController(
@@ -26,31 +24,21 @@ class Authorization : Fragment(R.layout.fragment_auth) {
             ).navigate(R.id.action_fragmentAuth_to_fragmentRegistration)
         }
 
-
         binding.startbtn.setOnClickListener {
             val email: String = binding.emailEdit.text.toString()
             val password: String = binding.passwordEdit.text.toString()
             if (email.isNotEmpty() || password.isNotEmpty()) {
                 viewModel.signIn(email, password)
-            } else {
-                Toast.makeText(requireContext(), "All fields are required", Toast.LENGTH_SHORT)
-                    .show()
-            }
+            } else makeShortToast("All fields are required")
         }
 
-        viewModel.statusLiveData.observe(viewLifecycleOwner) { commonStatus ->
-            if (commonStatus == CommonStatus.SUCCESS) {
-                Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-                    .navigate(R.id.action_fragmentAuth_to_fragmentUsers)
-            } else {
-                Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.statusSharedFlow.collect { authStatus ->
+                when(authStatus) {
+                    AuthStatus.SUCCESS -> Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.action_fragmentAuth_to_fragmentUsers)
+                    AuthStatus.FAILURE -> makeShortToast("Authentication failed")
+                }
             }
         }
-
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -1,63 +1,65 @@
 package com.messengerkotlin.firebase_repository
 
 
-import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.EventResponse
+import com.messengerkotlin.core.firebase_hierarchy.FBNames
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
 import com.messengerkotlin.firebase_repository.extensions.onValueEventFlow
 import com.messengerkotlin.models.ChatInfoModel
 import com.messengerkotlin.models.UserModel
-import kotlinx.coroutines.flow.*
-import kotlin.collections.forEach
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.withContext
 
-class OtherUserRepository {
+class OtherUserRepository(private val ioDispatcher: CoroutineDispatcher, val fbNames: FBNames) {
 
     private val rootReference = FirebaseDatabase.getInstance().reference
 
-    suspend fun getOtherUsersInfoFromChatsRegister(
-        currentUserId: String
-    ): HashMap<String, UserModel> {
-        val users: HashMap<String, UserModel> = HashMap()
-        val dataSnapshot = getDataSnapshotById(currentUserId) // todo warning
-        dataSnapshot
-            .mapNotNull { snapshot -> snapshot.getValue(ChatInfoModel::class.java) }
-            .collect { chatInfoModel ->
-                getOtherUserById(chatInfoModel.otherUserId)?.let {
-                    users[it.id] = it
+    suspend fun getOtherUsersFromStorageChatsRegister(currentUserId: String): List<ChatInfoModel> =
+        withContext(ioDispatcher) {
+            when (val eventResponse = rootReference.child(fbNames.userChatsRegister).child(currentUserId)
+                .child(fbNames.storageUsersChat).onSingleEvent()) {
+                is EventResponse.Cancelled -> throw IllegalStateException()
+                is EventResponse.Changed -> {
+                    eventResponse.snapshot.children.mapNotNull { snapshot ->
+                        snapshot.getValue(
+                            ChatInfoModel::class.java
+                        )
+                    }
                 }
             }
-        return users
-    }
+        }
 
-    private suspend fun getDataSnapshotById(currentUserId: String): Flow<DataSnapshot> =
-        rootReference.child("UserChatsRegister").child(currentUserId).onValueEventFlow()
-            .filter { it is EventResponse.Changed }.map { (it as EventResponse.Changed).snapshot }
+    suspend fun getOtherUsersFromLastChatsRegister(currentUserId: String): Flow<ChatInfoModel> =
+        withContext(ioDispatcher) {
+            rootReference.child(fbNames.userChatsRegister).child(currentUserId).child(fbNames.lastUserChat).onValueEventFlow()
+                .filter { it is EventResponse.Changed }
+                .mapNotNull { (it as EventResponse.Changed).snapshot.getValue(ChatInfoModel::class.java) }
+        }
 
-
-    suspend fun getOtherUserById(userId: String): UserModel? {
-        when (val eventResponse = rootReference.child("Users").child(userId).onSingleEvent()) {
+    suspend fun getOtherUserById(userId: String): UserModel = withContext(ioDispatcher) {
+        when (val eventResponse =
+            rootReference.child(fbNames.users).child(userId).onSingleEvent()) {
             is EventResponse.Cancelled -> throw IllegalStateException()
-            is EventResponse.Changed -> return eventResponse.snapshot.getValue(UserModel::class.java)
+            is EventResponse.Changed -> eventResponse.snapshot.getValue(UserModel::class.java)!!
         }
     }
 
     suspend fun getOtherUserIdByUserkey(
-        currentUserId: String,
         userKey: String,
-    ): String? {
-        when (val response = rootReference.child("Users").onSingleEvent()) {
-            is EventResponse.Cancelled -> throw java.lang.IllegalStateException()
+    ): String? = withContext(ioDispatcher) {
+         when (val response = rootReference.child(fbNames.userKeys).child(userKey).onSingleEvent()) {
+            is EventResponse.Cancelled -> throw IllegalStateException()
             is EventResponse.Changed -> {
-                response.snapshot.children
-                    .mapNotNull { child -> child.getValue(UserModel::class.java) }
-                    .filter { userModel -> userModel.id != currentUserId && userModel.userkey == userKey }
-                    .map { userModel ->
-                        return userModel.id
-                    }
-                return null
+                return@withContext if (response.snapshot.exists()){
+                    response.snapshot.getValue(String::class.java)
+                } else {
+                    null
+                }
             }
         }
     }
-
 }

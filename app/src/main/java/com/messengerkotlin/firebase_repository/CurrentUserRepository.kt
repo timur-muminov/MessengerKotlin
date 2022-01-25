@@ -3,68 +3,68 @@ package com.messengerkotlin.firebase_repository
 import android.content.ContentResolver
 import android.net.Uri
 import android.webkit.MimeTypeMap
-import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.messengerkotlin.core.EventResponse
 import com.messengerkotlin.core.enums.CommonStatus
+import com.messengerkotlin.core.firebase_hierarchy.FBNames
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
 import com.messengerkotlin.firebase_repository.extensions.onValueEventFlow
 import com.messengerkotlin.models.UserModel
-import kotlinx.coroutines.flow.collect
-import java.lang.IllegalStateException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
-class CurrentUserRepository {
+class CurrentUserRepository(private val ioDispatcher: CoroutineDispatcher, fbNames: FBNames) {
 
-    private val usersReference = FirebaseDatabase.getInstance().reference.child("Users")
+    private val usersReference = FirebaseDatabase.getInstance().reference.child(fbNames.users)
+    private val userKeysReference = FirebaseDatabase.getInstance().reference.child(fbNames.userKeys)
 
-    suspend fun getCurrentUser(currentUserId: String, callback: (UserModel?) -> Unit) {
-        usersReference.child(currentUserId).onValueEventFlow().collect {
-            when (it) {
-                is EventResponse.Cancelled -> throw IllegalStateException()
-                is EventResponse.Changed -> callback(it.snapshot.getValue(UserModel::class.java))
-            }
+    suspend fun getCurrentUser(currentUserId: String): Flow<UserModel> =
+        withContext(ioDispatcher) {
+            usersReference.child(currentUserId).onValueEventFlow()
+                .filter { it is EventResponse.Changed }
+                .map { (it as EventResponse.Changed).snapshot.getValue(UserModel::class.java)!! }
         }
-    }
 
-    fun editUsername(currentUserId: String, username: String) {
+    suspend fun editUsername(currentUserId: String, username: String) = withContext(ioDispatcher){
         usersReference.child(currentUserId).child("username").setValue(username)
     }
 
     suspend fun editUserKey(
+        currentUserId: String,
         userkey: String
-    ): CommonStatus {
-        when (val response: EventResponse = usersReference.onSingleEvent()) {
+    ): CommonStatus = withContext(ioDispatcher){
+        when (val response: EventResponse = userKeysReference.child(userkey).onSingleEvent()) {
             is EventResponse.Cancelled -> throw IllegalStateException()
             is EventResponse.Changed -> {
-                response.snapshot.children
-                    .forEach { dataSnapshot ->
-                        val userModel = dataSnapshot.getValue(UserModel::class.java)
-                        if (userModel?.userkey != null && userModel.userkey == userkey) {
-                            return CommonStatus.ALREADY_EXIST
-                        }
-                    }
-                return CommonStatus.SUCCESS
+                return@withContext if (response.snapshot.value == null){
+                    userKeysReference.child(userkey).setValue(currentUserId)
+                    usersReference.child(currentUserId).child("userkey").setValue(userkey)
+                    CommonStatus.SUCCESS
+                } else {
+                    CommonStatus.ALREADY_EXIST
+                }
             }
         }
     }
 
 
-    fun loadProfileImage(currentUserId: String, imageUri: Uri, contentResolver: ContentResolver) {
-        val name = System.currentTimeMillis().toString() + "." + getFileExtension(
-            imageUri,
-            contentResolver
-        )
-        val storageReference = FirebaseStorage.getInstance().getReference("Uploads").child(name)
-
-        storageReference.putFile(imageUri).addOnCompleteListener { task1 ->
-            if (task1.isSuccessful) {
-                storageReference.downloadUrl.addOnCompleteListener { task2 ->
-                    if (task2.isSuccessful) {
-                        usersReference.child(currentUserId).child("imageurl")
-                            .setValue(task2.result.toString())
+    suspend fun loadProfileImage(currentUserId: String, imageUri: Uri, contentResolver: ContentResolver) {
+        withContext(ioDispatcher) {
+            val name = System.currentTimeMillis().toString() + "." + getFileExtension(
+                imageUri,
+                contentResolver
+            )
+            val storageReference = FirebaseStorage.getInstance().getReference("Uploads").child(name)
+            storageReference.putFile(imageUri).addOnCompleteListener { task1 ->
+                if (task1.isSuccessful) {
+                    storageReference.downloadUrl.addOnCompleteListener { task2 ->
+                        if (task2.isSuccessful) {
+                            usersReference.child(currentUserId).child("imageurl").setValue(task2.result.toString())
+                        }
                     }
                 }
             }

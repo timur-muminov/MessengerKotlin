@@ -11,11 +11,18 @@ import com.messengerkotlin.R
 import com.messengerkotlin.databinding.UserItemBinding
 import com.messengerkotlin.models.UserModel
 
-class UsersAdapter(var onItemTouched: (String) -> Unit) : ListAdapter<UserModel, UsersAdapter.UserViewHolder>(DiffCallback()) {
+class UsersAdapter(var onItemTouched: (String) -> Unit) :
+    ListAdapter<UserModel, UsersAdapter.UserViewHolder>(DiffCallback()) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        return UserViewHolder(UserItemBinding.inflate(LayoutInflater.from(parent.context), parent, false), onItemTouched)
+        return UserViewHolder(
+            UserItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            ), onItemTouched
+        )
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
@@ -29,7 +36,7 @@ class UsersAdapter(var onItemTouched: (String) -> Unit) : ListAdapter<UserModel,
         }
 
         override fun areContentsTheSame(oldItem: UserModel, newItem: UserModel): Boolean {
-            return false
+            return oldItem.username == newItem.username && oldItem.imageurl == newItem.imageurl
         }
     }
 
@@ -45,7 +52,7 @@ class UsersAdapter(var onItemTouched: (String) -> Unit) : ListAdapter<UserModel,
                 .into(binding.userPhoto)
 
             binding.name.text = userModel.username
-            binding.lastMessage.text = userModel.lastMessage
+            //binding.lastMessage.text = userModel.lastMessage
 
             itemView.setOnClickListener {
                 onItemTouched(userModel.id)

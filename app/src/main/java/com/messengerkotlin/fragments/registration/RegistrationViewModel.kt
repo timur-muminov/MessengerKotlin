@@ -1,17 +1,21 @@
 package com.messengerkotlin.fragments.registration
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.messengerkotlin.core.enums.CommonStatus
-import com.messengerkotlin.firebase_repository.AuthenticationManager
+import androidx.lifecycle.viewModelScope
+import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
+import com.messengerkotlin.firebase_repository.auth_manager.enums.AuthStatus
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 
 class RegistrationViewModel(private val authenticationManager: AuthenticationManager) : ViewModel() {
 
-    private val _statusMutableLiveData: MutableLiveData<CommonStatus> = MutableLiveData()
-    val statusLiveData: LiveData<CommonStatus> = _statusMutableLiveData
+    private val statusMutableSharedFlow: MutableSharedFlow<AuthStatus> = MutableSharedFlow(0)
+    val statusSharedFlow: SharedFlow<AuthStatus> = statusMutableSharedFlow
 
     fun signUp(username: String, email: String, password: String) {
-        authenticationManager.signUp(username, email, password, _statusMutableLiveData::postValue)
+        viewModelScope.launch {
+            statusMutableSharedFlow.emit(authenticationManager.signUp(username, email, password))
+        }
     }
 }

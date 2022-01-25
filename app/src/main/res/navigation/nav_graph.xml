@@ -12,7 +12,9 @@
         tools:layout="@layout/fragment_auth">
         <action
             android:id="@+id/action_fragmentAuth_to_fragmentUsers"
-            app:destination="@id/fragmentUsers" />
+            app:destination="@id/fragmentUsers"
+            app:popUpTo="@id/fragmentAuth"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_fragmentAuth_to_fragmentRegistration"
             app:destination="@id/fragmentRegistration" />
@@ -25,7 +27,9 @@
         tools:layout="@layout/fragment_registration">
         <action
             android:id="@+id/action_fragmentRegistration_to_fragmentUsers"
-            app:destination="@id/fragmentUsers" />
+            app:destination="@id/fragmentUsers"
+            app:popUpTo="@id/fragmentRegistration"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment

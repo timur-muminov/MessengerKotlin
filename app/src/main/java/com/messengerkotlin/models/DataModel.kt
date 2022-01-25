@@ -1,6 +1,6 @@
 package com.messengerkotlin.models
 
-data class Data(
+data class DataModel(
     val receiverId: String,
     val id: String,
     val username: String,

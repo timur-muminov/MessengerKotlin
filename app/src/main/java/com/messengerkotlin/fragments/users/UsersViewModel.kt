@@ -1,62 +1,78 @@
 package com.messengerkotlin.fragments.users
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.messengerkotlin.core.enums.Status
-import com.messengerkotlin.firebase_repository.*
-import com.messengerkotlin.models.MessageModel
+import com.messengerkotlin.firebase_repository.ChatRepository
+import com.messengerkotlin.firebase_repository.CurrentUserRepository
+import com.messengerkotlin.firebase_repository.OtherUserRepository
+import com.messengerkotlin.firebase_repository.UserStatusRepository
+import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
+import com.messengerkotlin.models.ChatInfoModel
 import com.messengerkotlin.models.UserModel
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.*
 
 class UsersViewModel(
-    private var authenticationManager: AuthenticationManager,
+    authenticationManager: AuthenticationManager,
     currentUserRepository: CurrentUserRepository,
     userStatusRepository: UserStatusRepository,
-    otherUserRepository: OtherUserRepository,
+    private val otherUserRepository: OtherUserRepository,
     private var chatRepository: ChatRepository
 ) : ViewModel() {
 
-    private val _currentUserMutableLiveData: MutableLiveData<UserModel> = MutableLiveData()
-    var currentUserLiveData: LiveData<UserModel> = _currentUserMutableLiveData
+    private val _currentUserMutableStateFlow: MutableStateFlow<UserModel?> = MutableStateFlow(null)
+    var currentUserStateFlow: StateFlow<UserModel?> = _currentUserMutableStateFlow
 
-    private val _otherUsersMutableLiveData: MutableLiveData<List<UserModel>> = MutableLiveData()
-    var otherUsersLiveData: LiveData<List<UserModel>> = _otherUsersMutableLiveData
+    private val _otherUsersMutableStateFlow: MutableStateFlow<List<UserModel>?> =
+        MutableStateFlow(null)
+    var otherUsersStateFlow: StateFlow<List<UserModel>?> = _otherUsersMutableStateFlow
+
+    private val currentList: HashMap<String, UserModel> = HashMap()
 
     init {
         authenticationManager.currentUserId?.let { it ->
-            userStatusRepository.setStatus(
-                it,
-                Status.ONLINE
-            )
-
             viewModelScope.launch {
-                currentUserRepository.getCurrentUser(it){_currentUserMutableLiveData.postValue(it)}
-                map(otherUserRepository.getOtherUsersInfoFromChatsRegister(it)){_otherUsersMutableLiveData.postValue(it)}
+                launch {
+                    userStatusRepository.setStatus(it, Status.ONLINE)
+                }
+                getOtherUsersInfoFromChatsRegister(it)
+
+                launch {
+                    currentUserRepository.getCurrentUser(it)
+                        .collect { _currentUserMutableStateFlow.emit(it) }
+                }
+
+                launch {
+                    otherUserRepository.getOtherUsersFromLastChatsRegister(it)
+                        .collect { otherUserId ->
+                            val otherUserModel = otherUserRepository.getOtherUserById(otherUserId.otherUserId)
+                            currentList[otherUserModel.id] = otherUserModel
+                            _otherUsersMutableStateFlow.value = currentList.values.toList()
+                        }
+                }
+
+
             }
         }
     }
 
-    private suspend fun map(
-        mapUsers: HashMap<String, UserModel>,
-        callback: (List<UserModel>?) -> Unit
-    ) {
-        authenticationManager.currentUserId?.let { currentUserId ->
-            var count = 0
-            mapUsers.forEach { map ->
-                val chatId = chatRepository.findChatById(currentUserId, map.key)
-                chatRepository.getActualMessage(chatId) { messageModel ->
-                    map.value.lastMessage = messageModel?.message ?: ""
-                    if (mapUsers.size == count) {
-                        callback(ArrayList(mapUsers.values))
-                    }
-                    count++
-                }
+    private fun getOtherUsersInfoFromChatsRegister(it: String) {
+        viewModelScope.launch {
+            val chatList: List<ChatInfoModel> = otherUserRepository.getOtherUsersFromStorageChatsRegister(it)
 
+            chatList.forEach { chatInfoModel ->
+                launch {
+                    val userModel = otherUserRepository.getOtherUserById(chatInfoModel.otherUserId)
+                    currentList[userModel.id] = userModel
+                    _otherUsersMutableStateFlow.value = currentList.values.toList()
+                }
             }
+
+
         }
     }
 

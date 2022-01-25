@@ -6,9 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.messengerkotlin.firebase_repository.AuthenticationManager
+import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.firebase_repository.CurrentUserRepository
 import com.messengerkotlin.models.UserModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
@@ -16,25 +19,26 @@ class ProfileViewModel(
     private val currentUserRepository: CurrentUserRepository
 ) : ViewModel() {
 
-    private val _currentUserMutableLiveData: MutableLiveData<UserModel> = MutableLiveData()
-    var currentUserLiveData: LiveData<UserModel> = _currentUserMutableLiveData
+    private val _currentUserMutableStateFlow: MutableStateFlow<UserModel?> = MutableStateFlow(null)
+    var currentUserStateFlow: StateFlow<UserModel?> = _currentUserMutableStateFlow
 
     init {
         authenticationManager.currentUserId?.let {
             viewModelScope.launch {
-                _currentUserMutableLiveData.postValue(currentUserRepository.getCurrentUser(it))
+                currentUserRepository.getCurrentUser(it).collect { _currentUserMutableStateFlow.value = it}
             }
         }
     }
 
     fun loadProfileImage(imageUri: Uri, contentResolver: ContentResolver) {
         authenticationManager.currentUserId?.let {
-            currentUserRepository.loadProfileImage(
-                it,
-                imageUri,
-                contentResolver
-            )
+            viewModelScope.launch {
+                currentUserRepository.loadProfileImage(
+                    it,
+                    imageUri,
+                    contentResolver
+                )
+            }
         }
     }
-
 }

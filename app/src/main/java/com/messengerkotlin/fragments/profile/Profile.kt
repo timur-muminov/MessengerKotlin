@@ -1,38 +1,35 @@
 package com.messengerkotlin.fragments.profile
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.messengerkotlin.R
-import com.messengerkotlin.core.ViewModelFactory
 import com.messengerkotlin.databinding.FragmentProfileBinding
+import com.messengerkotlin.fragments.BaseFragment
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class Profile : Fragment(R.layout.fragment_profile) {
+class Profile : BaseFragment<FragmentProfileBinding>(FragmentProfileBinding::inflate) {
 
-    private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
+    private val viewModel: ProfileViewModel by viewModel()
 
     private lateinit var launcher: ActivityResultLauncher<String>
-    private lateinit var viewModel: ProfileViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this,ViewModelFactory(null)).get(ProfileViewModel::class.java)
-        launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri ->
-            viewModel.loadProfileImage(uri, requireActivity().contentResolver)
+        launcher = registerForActivityResult(ActivityResultContracts.GetContent()) {
+            it?.let { uri ->
+                viewModel.loadProfileImage(uri, requireActivity().contentResolver)
+            }
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        _binding = FragmentProfileBinding.bind(view)
-        val viewModel = ViewModelProvider(this, ViewModelFactory(null)).get(ProfileViewModel::class.java)
-
         binding.toolbar.inflateMenu(R.menu.menu_profile)
         binding.toolbar.setOnMenuItemClickListener { item ->
             if (item.itemId == R.id.edit_profile) {
@@ -42,15 +39,19 @@ class Profile : Fragment(R.layout.fragment_profile) {
             return@setOnMenuItemClickListener true
         }
 
-        viewModel.currentUserLiveData.observe(viewLifecycleOwner) { userModel ->
-            Glide.with(this)
-                .asBitmap()
-                .centerCrop()
-                .circleCrop()
-                .load(userModel.imageurl ?: R.mipmap.ic_launcher)
-                .into(binding.profileImage)
-            binding.username.text = userModel.username
-            binding.userKey.text = userModel.userkey ?: ""
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentUserStateFlow.collect {
+                it?.let { userModel ->
+                    Glide.with(requireContext())
+                        .asBitmap()
+                        .centerCrop()
+                        .circleCrop()
+                        .load(userModel.imageurl ?: R.mipmap.ic_launcher_round)
+                        .into(binding.profileImage)
+                    binding.username.text = userModel.username
+                    binding.userKey.text = userModel.userkey ?: ""
+                }
+            }
         }
 
         binding.editPhoto.setOnClickListener {
@@ -58,10 +59,5 @@ class Profile : Fragment(R.layout.fragment_profile) {
         }
 
         binding.backBtn.setOnClickListener { requireActivity().onBackPressed() }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
