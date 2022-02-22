@@ -2,6 +2,7 @@ package com.messengerkotlin.fragments.users
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -13,13 +14,14 @@ import com.messengerkotlin.R
 import com.messengerkotlin.databinding.FragmentUsersBinding
 import com.messengerkotlin.fragments.BaseFragment
 import com.messengerkotlin.fragments.users.adapters.UsersAdapter
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@AndroidEntryPoint
 class Users : BaseFragment<FragmentUsersBinding>(FragmentUsersBinding::inflate) {
 
-    private val viewModel: UsersViewModel by viewModel()
+    private val viewModel: UsersViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 

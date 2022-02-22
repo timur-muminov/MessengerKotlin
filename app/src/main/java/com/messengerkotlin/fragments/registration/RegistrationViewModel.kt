@@ -4,11 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.firebase_repository.auth_manager.enums.AuthStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RegistrationViewModel(private val authenticationManager: AuthenticationManager) : ViewModel() {
+@HiltViewModel
+class RegistrationViewModel @Inject constructor(private val authenticationManager: AuthenticationManager) : ViewModel() {
 
     private val statusMutableSharedFlow: MutableSharedFlow<AuthStatus> = MutableSharedFlow(0)
     val statusSharedFlow: SharedFlow<AuthStatus> = statusMutableSharedFlow

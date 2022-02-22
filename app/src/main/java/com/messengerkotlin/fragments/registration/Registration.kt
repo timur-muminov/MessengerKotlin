@@ -2,20 +2,22 @@ package com.messengerkotlin.fragments.registration
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.messengerkotlin.R
 import com.messengerkotlin.databinding.FragmentRegistrationBinding
 import com.messengerkotlin.firebase_repository.auth_manager.enums.AuthStatus
 import com.messengerkotlin.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@AndroidEntryPoint
 class Registration :
     BaseFragment<FragmentRegistrationBinding>(FragmentRegistrationBinding::inflate) {
 
-    private val viewModel: RegistrationViewModel by viewModel()
+    private val viewModel: RegistrationViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.startbtn.setOnClickListener {

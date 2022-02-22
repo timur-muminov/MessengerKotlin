@@ -1,5 +1,6 @@
 package com.messengerkotlin.fragments.chatroom
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.messengerkotlin.firebase_repository.ChatRepository
@@ -10,18 +11,23 @@ import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManage
 import com.messengerkotlin.firebase_repository.messaging.MessagingManager
 import com.messengerkotlin.models.MessageModel
 import com.messengerkotlin.models.UserModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChatroomViewModel(
+@HiltViewModel
+class ChatroomViewModel @Inject constructor(
     private val authenticationManager: AuthenticationManager,
     private val currentUserRepository: CurrentUserRepository,
     private val userStatusRepository: UserStatusRepository,
     private val otherUserRepository: OtherUserRepository,
     private val chatRepository: ChatRepository,
     private val messagingManager: MessagingManager,
-    private var otherUserId: String
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private var otherUserId: String = savedStateHandle["receiverId"]!!
 
     private val _otherUserMutableStateFlow: MutableStateFlow<UserModel?> = MutableStateFlow(null)
     val otherUserStateFlow: StateFlow<UserModel?> = _otherUserMutableStateFlow

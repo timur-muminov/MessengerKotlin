@@ -7,7 +7,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.messengerkotlin.core.EventResponse
 import com.messengerkotlin.core.enums.CommonStatus
-import com.messengerkotlin.core.firebase_hierarchy.FBNames
+import com.messengerkotlin.core.utils.FBNames
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
 import com.messengerkotlin.firebase_repository.extensions.onValueEventFlow
 import com.messengerkotlin.models.UserModel
@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class CurrentUserRepository(private val ioDispatcher: CoroutineDispatcher, fbNames: FBNames) {
+class CurrentUserRepository(private val ioDispatcher: CoroutineDispatcher) {
 
-    private val usersReference = FirebaseDatabase.getInstance().reference.child(fbNames.users)
-    private val userKeysReference = FirebaseDatabase.getInstance().reference.child(fbNames.userKeys)
+    private val usersReference = FirebaseDatabase.getInstance().reference.child(FBNames.users)
+    private val userKeysReference = FirebaseDatabase.getInstance().reference.child(FBNames.userKeys)
 
     suspend fun getCurrentUser(currentUserId: String): Flow<UserModel> =
         withContext(ioDispatcher) {

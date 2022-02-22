@@ -2,6 +2,7 @@ package com.messengerkotlin.fragments.chatroom
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,14 +11,14 @@ import com.messengerkotlin.R
 import com.messengerkotlin.databinding.FragmentChatroomBinding
 import com.messengerkotlin.fragments.BaseFragment
 import com.messengerkotlin.fragments.chatroom.adapter.ChatRecyclerAdapter
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
+@AndroidEntryPoint
 class Chatroom : BaseFragment<FragmentChatroomBinding>(FragmentChatroomBinding::inflate) {
 
-    private val viewModel: ChatroomViewModel by viewModel { parametersOf(arguments?.getString("receiverId")) }
+    private val viewModel: ChatroomViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewLifecycleOwner.lifecycleScope.launch {

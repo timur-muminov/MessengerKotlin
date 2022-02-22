@@ -3,14 +3,15 @@ package com.messengerkotlin.firebase_repository.auth_manager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
-import com.messengerkotlin.core.firebase_hierarchy.FBNames
+import com.messengerkotlin.core.utils.FBNames
 import com.messengerkotlin.firebase_repository.auth_manager.enums.AuthStatus
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class AuthenticationManager(private val ioDispatcher: CoroutineDispatcher, val fbNames: FBNames) {
+class AuthenticationManager @Inject constructor(private val ioDispatcher: CoroutineDispatcher) {
 
     var currentUserId: String? = null
 
@@ -38,7 +39,7 @@ class AuthenticationManager(private val ioDispatcher: CoroutineDispatcher, val f
                                     map["username"] = username
                                     map["token"] = tokenTask.result
 
-                                    FirebaseDatabase.getInstance().reference.child(fbNames.users).child(currentUserId.toString()).setValue(map)
+                                    FirebaseDatabase.getInstance().reference.child(FBNames.users).child(currentUserId.toString()).setValue(map)
 
                                 }
                                 continuation.resume(AuthStatus.SUCCESS)

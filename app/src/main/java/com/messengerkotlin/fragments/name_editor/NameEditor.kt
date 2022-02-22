@@ -2,17 +2,19 @@ package com.messengerkotlin.fragments.name_editor
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.databinding.FragmentNameEditorBinding
 import com.messengerkotlin.fragments.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@AndroidEntryPoint
 class NameEditor : BaseFragment<FragmentNameEditorBinding>(FragmentNameEditorBinding::inflate) {
 
-    private val viewModel: NameEditorViewModel by viewModel()
+    private val viewModel: NameEditorViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 

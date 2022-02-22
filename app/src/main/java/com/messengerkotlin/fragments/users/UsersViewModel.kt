@@ -10,18 +10,21 @@ import com.messengerkotlin.firebase_repository.UserStatusRepository
 import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.models.ChatInfoModel
 import com.messengerkotlin.models.UserModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 
-class UsersViewModel(
+@HiltViewModel
+class UsersViewModel @Inject constructor(
     authenticationManager: AuthenticationManager,
     currentUserRepository: CurrentUserRepository,
     userStatusRepository: UserStatusRepository,
-    private val otherUserRepository: OtherUserRepository,
-    private var chatRepository: ChatRepository
+    val otherUserRepository: OtherUserRepository,
+    val chatRepository: ChatRepository
 ) : ViewModel() {
 
     private val _currentUserMutableStateFlow: MutableStateFlow<UserModel?> = MutableStateFlow(null)

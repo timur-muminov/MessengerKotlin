@@ -6,12 +6,15 @@ import com.messengerkotlin.core.enums.CommonStatus
 import com.messengerkotlin.firebase_repository.CurrentUserRepository
 import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.models.UserModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NameEditorViewModel(
+@HiltViewModel
+class NameEditorViewModel @Inject constructor(
     private var authenticationManager: AuthenticationManager,
     private var currentUserRepository: CurrentUserRepository
 ) : ViewModel() {

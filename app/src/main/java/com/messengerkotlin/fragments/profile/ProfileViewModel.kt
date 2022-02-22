@@ -9,12 +9,15 @@ import androidx.lifecycle.viewModelScope
 import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
 import com.messengerkotlin.firebase_repository.CurrentUserRepository
 import com.messengerkotlin.models.UserModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val authenticationManager: AuthenticationManager,
     private val currentUserRepository: CurrentUserRepository
 ) : ViewModel() {

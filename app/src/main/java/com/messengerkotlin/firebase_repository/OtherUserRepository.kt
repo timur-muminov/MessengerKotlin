@@ -3,7 +3,7 @@ package com.messengerkotlin.firebase_repository
 
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.EventResponse
-import com.messengerkotlin.core.firebase_hierarchy.FBNames
+import com.messengerkotlin.core.utils.FBNames
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
 import com.messengerkotlin.firebase_repository.extensions.onValueEventFlow
 import com.messengerkotlin.models.ChatInfoModel
@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 
-class OtherUserRepository(private val ioDispatcher: CoroutineDispatcher, val fbNames: FBNames) {
+class OtherUserRepository(private val ioDispatcher: CoroutineDispatcher) {
 
     private val rootReference = FirebaseDatabase.getInstance().reference
 
     suspend fun getOtherUsersFromStorageChatsRegister(currentUserId: String): List<ChatInfoModel> =
         withContext(ioDispatcher) {
-            when (val eventResponse = rootReference.child(fbNames.userChatsRegister).child(currentUserId)
-                .child(fbNames.storageUsersChat).onSingleEvent()) {
+            when (val eventResponse = rootReference.child(FBNames.userChatsRegister).child(currentUserId)
+                .child(FBNames.storageUsersChat).onSingleEvent()) {
                 is EventResponse.Cancelled -> throw IllegalStateException()
                 is EventResponse.Changed -> {
                     eventResponse.snapshot.children.mapNotNull { snapshot ->
@@ -35,14 +35,14 @@ class OtherUserRepository(private val ioDispatcher: CoroutineDispatcher, val fbN
 
     suspend fun getOtherUsersFromLastChatsRegister(currentUserId: String): Flow<ChatInfoModel> =
         withContext(ioDispatcher) {
-            rootReference.child(fbNames.userChatsRegister).child(currentUserId).child(fbNames.lastUserChat).onValueEventFlow()
+            rootReference.child(FBNames.userChatsRegister).child(currentUserId).child(FBNames.lastUserChat).onValueEventFlow()
                 .filter { it is EventResponse.Changed }
                 .mapNotNull { (it as EventResponse.Changed).snapshot.getValue(ChatInfoModel::class.java) }
         }
 
     suspend fun getOtherUserById(userId: String): UserModel = withContext(ioDispatcher) {
         when (val eventResponse =
-            rootReference.child(fbNames.users).child(userId).onSingleEvent()) {
+            rootReference.child(FBNames.users).child(userId).onSingleEvent()) {
             is EventResponse.Cancelled -> throw IllegalStateException()
             is EventResponse.Changed -> eventResponse.snapshot.getValue(UserModel::class.java)!!
         }
@@ -51,7 +51,7 @@ class OtherUserRepository(private val ioDispatcher: CoroutineDispatcher, val fbN
     suspend fun getOtherUserIdByUserkey(
         userKey: String,
     ): String? = withContext(ioDispatcher) {
-         when (val response = rootReference.child(fbNames.userKeys).child(userKey).onSingleEvent()) {
+         when (val response = rootReference.child(FBNames.userKeys).child(userKey).onSingleEvent()) {
             is EventResponse.Cancelled -> throw IllegalStateException()
             is EventResponse.Changed -> {
                 return@withContext if (response.snapshot.exists()){

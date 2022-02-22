@@ -1,20 +1,21 @@
 package com.messengerkotlin
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.messengerkotlin.core.enums.Status
 import com.messengerkotlin.firebase_repository.UserStatusRepository
 import com.messengerkotlin.firebase_repository.auth_manager.AuthenticationManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val auth: AuthenticationManager by inject()
-    private val userStatusRepository: UserStatusRepository by inject()
+    @Inject lateinit var auth: AuthenticationManager
+    @Inject lateinit var userStatusRepository: UserStatusRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

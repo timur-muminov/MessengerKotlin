@@ -4,15 +4,15 @@ import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.EventResponse
-import com.messengerkotlin.core.firebase_hierarchy.FBNames
-import com.messengerkotlin.firebase_repository.OtherUserRepository
+import com.messengerkotlin.core.utils.FBNames
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
 import com.messengerkotlin.models.*
 import com.messengerkotlin.network_service.API
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class NotificationManager(private val fbNames: FBNames, private val api: API) {
+class NotificationManager  @Inject constructor(private val api: API) {
 
     private val commonReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var tokenReference: DatabaseReference? = null
@@ -22,7 +22,7 @@ class NotificationManager(private val fbNames: FBNames, private val api: API) {
 
     fun create(otherUserId: String) {
         this.otherUserId = otherUserId
-        tokenReference = commonReference.child(fbNames.users).child(otherUserId).child("token")
+        tokenReference = commonReference.child(FBNames.users).child(otherUserId).child("token")
     }
 
     suspend fun sendNotification(message: String) = withContext(Dispatchers.IO) {
