@@ -1,10 +1,9 @@
 package com.messengerkotlin.firebase_repository.messaging
 
-import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.enums.Status
-import com.messengerkotlin.core.firebase_hierarchy.FBNames
+import com.messengerkotlin.core.utils.FBNames
 import com.messengerkotlin.models.UserModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

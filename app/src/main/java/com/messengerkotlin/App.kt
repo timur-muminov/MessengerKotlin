@@ -24,7 +24,6 @@ class App : Application() {
             modules(
                 repositoriesModule,
                 viewModelsModel,
-                helperModule,
                 retrofitModule,
                 messagingModule
             )

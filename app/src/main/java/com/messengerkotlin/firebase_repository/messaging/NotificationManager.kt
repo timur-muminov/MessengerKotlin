@@ -4,8 +4,7 @@ import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.messengerkotlin.core.EventResponse
-import com.messengerkotlin.core.firebase_hierarchy.FBNames
-import com.messengerkotlin.firebase_repository.OtherUserRepository
+import com.messengerkotlin.core.utils.FBNames
 import com.messengerkotlin.firebase_repository.extensions.onSingleEvent
 import com.messengerkotlin.models.*
 import com.messengerkotlin.network_service.API
