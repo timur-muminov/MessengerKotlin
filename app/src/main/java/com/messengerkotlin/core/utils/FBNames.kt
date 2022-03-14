@@ -1,13 +1,13 @@
 package com.messengerkotlin.core.utils
 
 object FBNames{
-    val userChatsRegister: String = "UserChatsRegister"
-    val storageUsersChat: String = "StorageUsersChat"
-    val lastUserChat: String = "LastUserChat"
-    val userConnectionStatus: String = "UserConnectionStatus"
-    val users: String = "Users"
-    val chats: String = "Chats"
-    val userKeys: String = "UserKeys"
-    val storageMessages: String = "StorageChat"
-    val lastMessages: String = "ActualChat"
+    const val userChatsRegister: String = "UserChatsRegister"
+    const val storageUsersChat: String = "StorageUsersChat"
+    const val lastUserChat: String = "LastUserChat"
+    const val userConnectionStatus: String = "UserConnectionStatus"
+    const val users: String = "Users"
+    const val chats: String = "Chats"
+    const val userKeys: String = "UserKeys"
+    const val storageMessages: String = "StorageChat"
+    const val lastMessages: String = "ActualChat"
 }
